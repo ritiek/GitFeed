@@ -10,7 +10,10 @@ url = 'https://api.github.com/users/' + user +'/received_events?page=1'
 
 response = loads(requests.get(url).text)
 
+# review PR
 def PRReviewEvent(item):
+	event = item['type']
+	print event
 	commit = item['payload']['comment']['commit_id']
 	print commit
 	link = item['payload']['pull_request']['html_url']
@@ -18,21 +21,27 @@ def PRReviewEvent(item):
 	print title
 	body = item['payload']['comment']['body']
 	print body
+	print link
 	created_at = item['payload']['comment']['created_at']
 	print created_at
-	print link
 
+# open PR, close PR, comment on PR
 def PREvent(item):
+	event = item['type']
+	print event
 	link = item['payload']['pull_request']['html_url']
 	title = item['payload']['pull_request']['title']
 	print title
 	#body = item['payload']['comment']['body']
 	#print body
+	print link
 	created_at = item['payload']['pull_request']['created_at']
 	print created_at
-	print link
 
+# comment on issue
 def issueCommentEvent(item):
+	event = item['type']
+	print event
 	link = item['payload']['issue']['html_url']
 	labels = item['payload']['issue']['labels']
 	for x in labels:
@@ -43,11 +52,14 @@ def issueCommentEvent(item):
 	print title
 	body = item['payload']['comment']['body']
 	print body
+	print link
 	created_at = item['payload']['comment']['created_at']
 	print created_at
-	print link
 
+# open issue, close issue
 def issuesEvent(item):
+	event = item['type']
+	print event
 	link = item['payload']['issue']['html_url']
 	title = item['payload']['issue']['title']
 	print title
@@ -62,31 +74,81 @@ def issuesEvent(item):
 		pass
 	print link
 
+# starred by following
 def watchEvent(item):
+	event = item['type']
+	print event
 	link = 'https://github.com/' + item['repo']['name']
 	print link
+	created_at = item['created_at']
+	print created_at
 
+# forked by following
 def forkEvent(item):
+	event = item['type']
+	print event
 	link = 'https://github.com/' + item['repo']['name']
 	print link
+	created_at = item['created_at']
+	print created_at
 
+# delete branch
 def deleteEvent(item):
+	event = item['type']
+	print event
 	link = 'https://github.com/' + item['repo']['name']
 	print link
 	branch = item['payload']['ref']
 	print branch
+	created_at = item['created_at']
+	print created_at
 
+# push commits
 def pushEvent(item):
+	event = item['type']
+	print event
 	link = 'https://github.com/' + item['repo']['name']
 	print link
 	size = item['payload']['distinct_size']
 	print size
+	created_at = item['created_at']
+	print created_at
+
+# create repo
+def createEvent(item):
+	event = item['type']
+	print event
+	link = 'https://github.com/' + item['repo']['name']
+	print link
+	created_at = item['created_at']
+	print created_at
+
+# make public repo
+def publicEvent(item):
+	event = item['type']
+	print event
+	link = 'https://github.com/' + item['repo']['name']
+	print link
+	created_at = item['created_at']
+	print created_at
+
+# add collab
+def memberEvent(item):
+	event = item['type']
+	print event
+	link = 'https://github.com/' + item['repo']['name']
+	print link
+	collab = item['payload']['member']['login']
+	print collab
+	action = item['payload']['action']
+	print action
+	created_at = item['created_at']
+	print created_at
 
 for item in response:
 	user = item['actor']['login']
 	print user
 	event = item['type']
-	print event
 
 	if event == "PullRequestReviewCommentEvent": # review PR
 		PRReviewEvent(item)
@@ -104,6 +166,12 @@ for item in response:
 		deleteEvent(item)
 	elif event == "PushEvent": # push commits
 		pushEvent(item)
+	elif event == "CreateEvent":
+		createEvent(item)
+	elif event == "PublicEvent":
+		publicEvent(item)
+	elif event == "MemberEvent":
+		memberEvent(item)
 	print('')
 
 #print response[1]
