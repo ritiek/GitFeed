@@ -1,5 +1,3 @@
-# GitHub-in-Terminal
+# GitHub-Newsfeed
 
-[WIP] Browse GitHub via the terminal
-
-Check out the development in `develop` branch!
+[WIP] GitHub Newsfeed right in your terminal
