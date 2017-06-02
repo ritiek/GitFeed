@@ -26,13 +26,11 @@ def getArgs(argv=None):
 def PRReviewEvent(item, quiet):
 	user = item['actor']['login']
 	repo = item['repo']['name']
-	commit = item['payload']['comment']['commit_id']
-	link = item['payload']['pull_request']['html_url']
-	title = item['payload']['pull_request']['title']
+	#commit = item['payload']['comment']['commit_id']
+	#link = item['payload']['pull_request']['html_url']
+	#title = item['payload']['pull_request']['title']
 	number = item['payload']['pull_request']['number']
 	body = item['payload']['comment']['body']
-	created_at = item['payload']['comment']['created_at']
-	#print created_at
 
 	print Fore.GREEN + '{} reviewed pull request {} on {}'.format(user, number, repo)
 	if not quiet:
@@ -42,12 +40,10 @@ def PRReviewEvent(item, quiet):
 def PREvent(item, quiet):
 	user = item['actor']['login']
 	repo = item['repo']['name']
-	link = item['payload']['pull_request']['html_url']
-	title = item['payload']['pull_request']['title']
+	#link = item['payload']['pull_request']['html_url']
 	state = item['payload']['pull_request']['state']
 	number = item['payload']['pull_request']['number']
-	created_at = item['payload']['pull_request']['created_at']
-	#print created_at
+	title = item['payload']['pull_request']['title']
 	if state == 'open':
 		print Fore.CYAN + '{} opened pull request {} on {}'.format(user, number, repo)
 		print Style.BRIGHT + title
@@ -62,16 +58,13 @@ def PREvent(item, quiet):
 def issueCommentEvent(item, quiet):
 	user = item['actor']['login']
 	repo = item['repo']['name']
-	link = item['payload']['issue']['html_url']
-	labels = item['payload']['issue']['labels']
+	#link = item['payload']['issue']['html_url']
+	#labels = item['payload']['issue']['labels'] # FIX_ME
 	#for x in labels:
 	#	print x['name']
-	state = item['payload']['action']
+	#state = item['payload']['action']
 	number = item['payload']['issue']['number']
-	title = item['payload']['issue']['title']
-	body = item['payload']['comment']['body']
-	created_at = item['payload']['comment']['created_at']
-	#print created_at
+	#title = item['payload']['issue']['title']
 	try:
 		if item['payload']['issue']['pull_request']:
 			group = 'pull request'
@@ -80,71 +73,60 @@ def issueCommentEvent(item, quiet):
 
 	print Fore.CYAN + Style.BRIGHT + '{} commented on {} {} on {}'.format(user, group, number, repo)
 	if not quiet:
+		body = item['payload']['comment']['body']
 		print body
 
 # open issue, close issue
-def issuesEvent(item, quiet):
+def issuesEvent(item):
 	user = item['actor']['login']
 	repo = item['repo']['name']
-	link = item['payload']['issue']['html_url']
-	title = item['payload']['issue']['title']
+	#link = item['payload']['issue']['html_url']
 	state = item['payload']['action']
 	number = item['payload']['issue']['number']
-	created_at = item['payload']['issue']['created_at']
-	#print created_at
 
 	print Fore.RED + Style.BRIGHT + '{} {} issue {} on {}'.format(user, state, number, repo)
+	title = item['payload']['issue']['title']
 	print Style.BRIGHT + title
 
 # starred by following
-def watchEvent(item, quiet):
+def watchEvent(item):
 	user = item['actor']['login']
 	repo = item['repo']['name']
-	link = 'https://github.com/' + item['repo']['name']
-	created_at = item['created_at']
-	#print created_at
+	#link = 'https://github.com/' + item['repo']['name']
 	print Fore.YELLOW + '{} starred {}'.format(user, repo)
 
 # forked by following
-def forkEvent(item, quiet):
+def forkEvent(item):
 	user = item['actor']['login']
 	repo = item['repo']['name']
-	link = 'https://github.com/' + item['repo']['name']
-	created_at = item['created_at']
-	#print created_at
+	#link = 'https://github.com/' + item['repo']['name']
 	print Fore.GREEN + '{} forked {}'.format(user, repo)
 
 # delete branch
-def deleteEvent(item, quiet):
+def deleteEvent(item):
 	user = item['actor']['login']
 	repo = item['repo']['name']
-	link = 'https://github.com/' + item['repo']['name']
+	#link = 'https://github.com/' + item['repo']['name']
 	branch = item['payload']['ref']
-	created_at = item['created_at']
-	#print created_at
 
 	print Fore.RED + '{} deleted branch {} at {}'.format(user, branch, repo)
 
 # push commits
-def pushEvent(item, quiet):
-	event = item['type']
+def pushEvent(item):
 	user = item['actor']['login']
-	repo = item['repo']['name']
-	link = 'https://github.com/' + item['repo']['name']
 	size = item['payload']['size']
+	repo = item['repo']['name']
 	branch = item['payload']['ref'].split('/')[-1]
-	created_at = item['created_at']
+	#link = 'https://github.com/' + item['repo']['name']
 
 	print Fore.BLUE + '{} pushed {} new commit(s) to {} at {}'.format(user, size, branch, repo)
 
 # create repo, branch
-def createEvent(item, quiet):
+def createEvent(item):
 	user = item['actor']['login']
 	repo = item['repo']['name']
 	group = item['payload']['ref_type']
-	link = 'https://github.com/' + item['repo']['name']
-	created_at = item['created_at']
-	#print created_at
+	#link = 'https://github.com/' + item['repo']['name']
 
 	if group == "repository":
 		print Fore.MAGENTA + Style.BRIGHT + '{} created {} {}'.format(user, group, repo)
@@ -153,24 +135,20 @@ def createEvent(item, quiet):
 		print Fore.MAGENTA + Style.BRIGHT + '{} created {} {} at {}'.format(user, group, branch, repo)
 
 # make public repo
-def publicEvent(item, quiet):
+def publicEvent(item):
 	user = item['actor']['login']
 	repo = item['repo']['name']
-	link = 'https://github.com/' + item['repo']['name']
-	created_at = item['created_at']
-	#print created_at
+	#link = 'https://github.com/' + item['repo']['name']
 
 	print Fore.MAGENTA + '{} made {} public'.format(user, repo)
 
 # add collab
-def memberEvent(item, quiet):
+def memberEvent(item):
 	user = item['actor']['login']
-	repo = item['repo']['name']
-	link = 'https://github.com/' + item['repo']['name']
-	collab = item['payload']['member']['login']
 	action = item['payload']['action']
-	created_at = item['created_at']
-	#print created_at
+	collab = item['payload']['member']['login']
+	repo = item['repo']['name']
+	#link = 'https://github.com/' + item['repo']['name']
 
 	print Fore.MAGENTA + '{} {} {} as a collaborator to {}'.format(user, action, collab, repo)
 
@@ -183,6 +161,7 @@ def getPage(user, page, quiet):
 			print(Fore.GREEN + Style.BRIGHT + created_at)
 
 		event = item['type']
+
 		if event == "PullRequestReviewCommentEvent": # review PR
 			PRReviewEvent(item, quiet)
 		elif event == "PullRequestEvent": # open PR, close PR
@@ -190,21 +169,22 @@ def getPage(user, page, quiet):
 		elif event == "IssueCommentEvent": # comment on issue/PR
 			issueCommentEvent(item, quiet)
 		elif event == "IssuesEvent": # open issue, close issue
-			issuesEvent(item, quiet)
+			issuesEvent(item)
 		elif event == "WatchEvent": # starred
-			watchEvent(item, quiet)
+			watchEvent(item)
 		elif event == "ForkEvent": # fork
-			forkEvent(item, quiet)
+			forkEvent(item)
 		elif event == "DeleteEvent": # delete branch
-			deleteEvent(item, quiet)
+			deleteEvent(item)
 		elif event == "PushEvent": # push commits
-			pushEvent(item, quiet)
+			pushEvent(item)
 		elif event == "CreateEvent": # make new repo, branch
-			createEvent(item, quiet)
+			createEvent(item)
 		elif event == "PublicEvent": # make repo public
-			publicEvent(item, quiet)
+			publicEvent(item)
 		elif event == "MemberEvent": # add collab
-			memberEvent(item, quiet)
+			memberEvent(item)
+
 		print('')
 
 def getPages(user, max_page, quiet):
