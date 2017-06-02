@@ -100,6 +100,17 @@ def issuesEvent(item):
 	title = item['payload']['issue']['title']
 	print Style.BRIGHT + title
 
+# comment on a commit
+def commitCommentEvent(item, quiet):
+	user = item['actor']['login']
+	repo = item['repo']['name']
+	#link = item['payload']['issue']['html_url']
+	body = item['payload']['comment']['body']
+
+	print Fore.CYAN + Style.BRIGHT + '{} commented on {}'.format(user, repo)
+	if not args.quiet:
+		print body
+
 # starred by following
 def watchEvent(item):
 	user = item['actor']['login']
@@ -182,6 +193,8 @@ def getPage(user, page, quiet):
 			issueCommentEvent(item, quiet)
 		elif event == "IssuesEvent": # open issue, close issue
 			issuesEvent(item)
+		elif event == "CommitCommentEvent":
+			commitCommentEvent(item, quiet)
 		elif event == "WatchEvent": # starred
 			watchEvent(item)
 		elif event == "ForkEvent": # fork
@@ -211,4 +224,5 @@ if args.no_style:
 user = args.user
 max_page = args.pages
 quiet = args.quiet
+
 getPages(user, max_page, quiet)
