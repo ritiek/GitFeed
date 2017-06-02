@@ -9,7 +9,7 @@ init(autoreset=True)
 
 #user = raw_input('Enter your username: ')
 user = 'ritiek'
-url = 'https://api.github.com/users/' + user +'/received_events?page=8'
+url = 'https://api.github.com/users/' + user +'/received_events?page=1'
 
 response = loads(requests.get(url).text)
 
@@ -35,6 +35,7 @@ def PRReviewEvent(item):
 	#print created_at
 
 	print Fore.GREEN + '{} reviewed pull request {} on {}'.format(user, number, repo)
+	print body
 
 # open PR, close PR
 def PREvent(item):
@@ -71,8 +72,8 @@ def issueCommentEvent(item):
 	#print repo
 	link = item['payload']['issue']['html_url']
 	labels = item['payload']['issue']['labels']
-	for x in labels:
-		print x['name']
+	#for x in labels:
+	#	print x['name']
 	state = item['payload']['action']
 	#print state
 	number = item['payload']['issue']['number']
