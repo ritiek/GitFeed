@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
 # Background color for labels
-#from colorama import Fore, Back, Style, init
+from colorama import Fore, Back, Style, init
 from json import loads
 import requests
+
+init(autoreset=True)
 
 #user = raw_input('Enter your username: ')
 user = 'ritiek'
@@ -32,7 +34,7 @@ def PRReviewEvent(item):
 	created_at = item['payload']['comment']['created_at']
 	#print created_at
 
-	print '{} reviewed pull request {} on {}'.format(user, number, repo)
+	print Fore.GREEN + '{} reviewed pull request {} on {}'.format(user, number, repo)
 
 # open PR, close PR
 def PREvent(item):
@@ -55,8 +57,8 @@ def PREvent(item):
 	created_at = item['payload']['pull_request']['created_at']
 	#print created_at
 
-	print '{} {} pull request {} on {}'.format(user, state, number, repo)
-	print title
+	print Fore.CYAN + Style.BRIGHT + '{} {} pull request {} on {}'.format(user, state, number, repo)
+	print Style.BRIGHT + title
 
 # comment on issue, PR
 def issueCommentEvent(item):
@@ -88,7 +90,7 @@ def issueCommentEvent(item):
 	except:
 		group = 'issue'
 
-	print '{} commented on {} {} on {}'.format(user, group, number, repo)
+	print Fore.CYAN + '{} commented on {} {} on {}'.format(user, group, number, repo)
 	print body
 
 # open issue, close issue
@@ -115,8 +117,8 @@ def issuesEvent(item):
 	#print created_at
 	#print link
 
-	print '{} {} issue {} on {}'.format(user, state, number, repo)
-	print title
+	print Fore.RED + Style.BRIGHT + '{} {} issue {} on {}'.format(user, state, number, repo)
+	print Style.BRIGHT + title
 
 # starred by following
 def watchEvent(item):
@@ -130,7 +132,7 @@ def watchEvent(item):
 	#print link
 	created_at = item['created_at']
 	#print created_at
-	print '{} starred {}'.format(user, repo)
+	print Fore.YELLOW + '{} starred {}'.format(user, repo)
 
 # forked by following
 def forkEvent(item):
@@ -143,7 +145,7 @@ def forkEvent(item):
 	#print link
 	created_at = item['created_at']
 	#print created_at
-	print '{} forked {}'.format(user, repo)
+	print Fore.GREEN + '{} forked {}'.format(user, repo)
 
 # delete branch
 def deleteEvent(item):
@@ -160,7 +162,7 @@ def deleteEvent(item):
 	created_at = item['created_at']
 	#print created_at
 
-	print '{} deleted branch {} at {}'.format(user, branch, repo)
+	print Fore.RED + '{} deleted branch {} at {}'.format(user, branch, repo)
 
 # push commits
 def pushEvent(item):
@@ -179,7 +181,7 @@ def pushEvent(item):
 	created_at = item['created_at']
 	#print created_at
 
-	print '{} pushed {} new commit(s) to {} at {}'.format(user, size, branch, repo)
+	print Fore.BLUE + '{} pushed {} new commit(s) to {} at {}'.format(user, size, branch, repo)
 
 # create repo, branch
 def createEvent(item):
@@ -197,10 +199,10 @@ def createEvent(item):
 	#print created_at
 
 	if group == "repository":
-		print '{} created {} {}'.format(user, group, repo)
+		print Fore.MAGENTA + Style.BRIGHT + '{} created {} {}'.format(user, group, repo)
 	else:
 		branch = item['payload']['ref']
-		print '{} created {} {} at {}'.format(user, group, branch, repo)
+		print Fore.MAGENTA + Style.BRIGHT + '{} created {} {} at {}'.format(user, group, branch, repo)
 
 # make public repo
 def publicEvent(item):
@@ -215,7 +217,7 @@ def publicEvent(item):
 	created_at = item['created_at']
 	#print created_at
 
-	print '{} made {} public'.format(user, repo)
+	print Fore.MAGENTA + '{} made {} public'.format(user, repo)
 
 # add collab
 def memberEvent(item):
@@ -234,7 +236,7 @@ def memberEvent(item):
 	created_at = item['created_at']
 	#print created_at
 
-	print '{} added {} as a collaborator to {}'.format(user, collab, repo)
+	print Fore.MAGENTA + '{} added {} as a collaborator to {}'.format(user, collab, repo)
 
 for item in reversed(response):
 	event = item['type']
@@ -242,11 +244,11 @@ for item in reversed(response):
 
 	if event == "PullRequestReviewCommentEvent": # review PR
 		PRReviewEvent(item)
-	elif event == "PullRequestEvent": # open PR
+	elif event == "PullRequestEvent": # open PR, close PR
 		PREvent(item)
 	elif event == "IssueCommentEvent": # comment on issue/PR
 		issueCommentEvent(item)
-	elif event == "IssuesEvent": # open issue/close issue
+	elif event == "IssuesEvent": # open issue, close issue
 		issuesEvent(item)
 	elif event == "WatchEvent": # starred
 		watchEvent(item)
@@ -256,7 +258,7 @@ for item in reversed(response):
 		deleteEvent(item)
 	elif event == "PushEvent": # push commits
 		pushEvent(item)
-	elif event == "CreateEvent": # make new repo
+	elif event == "CreateEvent": # make new repo, branch
 		createEvent(item)
 	elif event == "PublicEvent": # make repo public
 		publicEvent(item)
