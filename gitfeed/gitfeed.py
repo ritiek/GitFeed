@@ -6,6 +6,8 @@ from json import loads
 from sys import argv
 import requests
 import argparse
+from datetime import datetime
+import time
 
 def getArgs(argv=None):
 	parser = argparse.ArgumentParser(description='Check your GitHub Newsfeed via the command-line.',
@@ -42,7 +44,7 @@ def PRReviewEvent(item, quiet):
 	number = item['payload']['pull_request']['number']
 	body = item['payload']['comment']['body']
 
-	print Fore.GREEN + '{} reviewed pull request {} on {}'.format(user, number, repo)
+	print Fore.GREEN + Style.BRIGHT + '{} reviewed pull request {} on {}'.format(user, number, repo)
 	if not quiet:
 		print body
 
@@ -173,13 +175,41 @@ def memberEvent(item):
 
 	print Fore.MAGENTA + '{} {} {} as a collaborator to {}'.format(user, action, collab, repo)
 
+def getTimeDifference(created_at):
+	created_at = time.strptime(created_at, '%Y-%m-%dT%H:%M:%SZ')
+	created_at = time.mktime(created_at)
+
+	current_time = datetime.utcnow().replace(microsecond=0)
+	current_time = current_time.isoformat() + 'Z'
+	current_time = time.strptime(current_time, '%Y-%m-%dT%H:%M:%SZ')
+	current_time = time.mktime(current_time)
+
+	difference = current_time - created_at
+
+	days = ('day', int(difference) / 86400)
+	hours = ('hour', int(difference) / 3600 % 24)
+	minutes = ('minute', int(difference) / 60 % 60)
+	seconds = ('second', int(difference) % 60)
+
+	human_readable = (seconds, minutes, hours, days)
+	for item in human_readable:
+		if not item[1] == 0:
+			if item [1] == 1:
+				statement = '{} {} ago'.format(item[1], item[0])
+			else:
+				statement = '{} {}s ago'.format(item[1], item[0])
+
+	return statement
+
 def getPage(user, page, quiet, nt):
 	url = 'https://api.github.com/users/' + user +'/received_events?page='
 	response = loads(requests.get(url + str(page)).text)
 	for item in reversed(response):
 		if not nt:
 			created_at = item['created_at']
-			print(Fore.GREEN + Style.BRIGHT + created_at)
+			difference = getTimeDifference(created_at)
+
+			print(Fore.GREEN + difference)
 
 		event = item['type']
 
@@ -212,7 +242,7 @@ def getPage(user, page, quiet, nt):
 
 def getPages(user, max_page, quiet, nt):
 	for page in range(max_page, 0, -1):
-		getPage(user, page, quiet, nt)
+		getPage(user, 3, quiet, nt)
 
 def cli():
 	init(autoreset=True)
