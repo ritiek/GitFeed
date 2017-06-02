@@ -7,8 +7,6 @@ from sys import argv
 import requests
 import argparse
 
-init(autoreset=True)
-
 def getArgs(argv=None):
 	parser = argparse.ArgumentParser(description='Check your GitHub Newsfeed via the command-line.',
 	                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -108,7 +106,7 @@ def commitCommentEvent(item, quiet):
 	body = item['payload']['comment']['body']
 
 	print Fore.CYAN + Style.BRIGHT + '{} commented on {}'.format(user, repo)
-	if not args.quiet:
+	if not quiet:
 		print body
 
 # starred by following
@@ -175,11 +173,11 @@ def memberEvent(item):
 
 	print Fore.MAGENTA + '{} {} {} as a collaborator to {}'.format(user, action, collab, repo)
 
-def getPage(user, page, quiet):
+def getPage(user, page, quiet, nt):
 	url = 'https://api.github.com/users/' + user +'/received_events?page='
 	response = loads(requests.get(url + str(page)).text)
 	for item in reversed(response):
-		if not args.no_time_stamp:
+		if not nt:
 			created_at = item['created_at']
 			print(Fore.GREEN + Style.BRIGHT + created_at)
 
@@ -212,17 +210,23 @@ def getPage(user, page, quiet):
 
 		print('')
 
-def getPages(user, max_page, quiet):
+def getPages(user, max_page, quiet, nt):
 	for page in range(max_page, 0, -1):
-		getPage(user, page, quiet)
+		getPage(user, page, quiet, nt)
 
-args = getArgs()
+def cli():
+	init(autoreset=True)
 
-if args.no_style:
-	removeColor()
+	args = getArgs()
+	user = args.user
+	max_page = args.pages
+	quiet = args.quiet
+	nt = args.no_time_stamp
 
-user = args.user
-max_page = args.pages
-quiet = args.quiet
+	if args.no_style:
+		removeColor()
 
-getPages(user, max_page, quiet)
+	getPages(user, max_page, quiet, nt)
+
+if __name__ == '__main__':
+	cli()
