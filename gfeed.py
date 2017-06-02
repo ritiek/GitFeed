@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 # Background color for labels
-#from colorama import FORE, BACK, STYLE, init
+#from colorama import Fore, Back, Style, init
 from json import loads
 import requests
 
 #user = raw_input('Enter your username: ')
 user = 'ritiek'
-url = 'https://api.github.com/users/' + user +'/received_events?page=1'
+url = 'https://api.github.com/users/' + user +'/received_events?page=8'
 
 response = loads(requests.get(url).text)
 
@@ -16,49 +16,49 @@ def PRReviewEvent(item):
 	#event = item['type']
 	#print event
 	user = item['actor']['login']
-	print user
+	#print user
 	repo = item['repo']['name']
-	print repo
+	#print repo
 	commit = item['payload']['comment']['commit_id']
-	print commit
+	#print commit
 	link = item['payload']['pull_request']['html_url']
 	title = item['payload']['pull_request']['title']
-	print title
+	#print title
 	number = item['payload']['pull_request']['number']
-	print number
+	#print number
 	body = item['payload']['comment']['body']
-	print body
-	print link
+	#print body
+	#print link
 	created_at = item['payload']['comment']['created_at']
-	print created_at
+	#print created_at
 
 	print '{} reviewed pull request {} on {}'.format(user, number, repo)
 
-# open PR, close PR, comment on PR
+# open PR, close PR
 def PREvent(item):
 	#event = item['type']
 	#print event
 	user = item['actor']['login']
-	print user
+	#print user
 	repo = item['repo']['name']
-	print repo
+	#print repo
 	link = item['payload']['pull_request']['html_url']
 	title = item['payload']['pull_request']['title']
-	print title
+	#print title
 	state = item['payload']['pull_request']['state']
-	print state
+	#print state
 	number = item['payload']['pull_request']['number']
-	print number
+	#print number
 	#body = item['payload']['comment']['body']
 	#print body
-	print link
+	#print link
 	created_at = item['payload']['pull_request']['created_at']
-	print created_at
+	#print created_at
 
 	print '{} {} pull request {} on {}'.format(user, state, number, repo)
 	print title
 
-# comment on issue
+# comment on issue, PR
 def issueCommentEvent(item):
 	#event = item['type']
 	#print event
@@ -82,8 +82,13 @@ def issueCommentEvent(item):
 	#print link
 	created_at = item['payload']['comment']['created_at']
 	#print created_at
+	try:
+		if item['payload']['issue']['pull_request']:
+			group = 'pull request'
+	except:
+		group = 'issue'
 
-	print '{} commented on issue {} on {}'.format(user, number, repo)
+	print '{} commented on {} {} on {}'.format(user, group, number, repo)
 	print body
 
 # open issue, close issue
@@ -145,58 +150,70 @@ def deleteEvent(item):
 	#event = item['type']
 	#print event
 	user = item['actor']['login']
-	print user
+	#print user
 	repo = item['repo']['name']
-	print repo
+	#print repo
 	link = 'https://github.com/' + item['repo']['name']
-	print link
+	#print link
 	branch = item['payload']['ref']
-	print branch
+	#print branch
 	created_at = item['created_at']
-	print created_at
+	#print created_at
 
 	print '{} deleted branch {} at {}'.format(user, branch, repo)
 
 # push commits
 def pushEvent(item):
 	event = item['type']
-	print event
+	#print event
 	user = item['actor']['login']
-	print user
+	#print user
 	repo = item['repo']['name']
-	print repo
+	#print repo
 	link = 'https://github.com/' + item['repo']['name']
-	print link
-	size = item['payload']['distinct_size']
-	print size
+	#print link
+	size = item['payload']['size']
+	#print size
+	branch = item['payload']['ref'].split('/')[-1]
+	#print branch
 	created_at = item['created_at']
-	print created_at
+	#print created_at
+
+	print '{} pushed {} new commit(s) to {} at {}'.format(user, size, branch, repo)
 
 # create repo, branch
 def createEvent(item):
 	#event = item['type']
 	#print event
 	user = item['actor']['login']
-	print user
+	#print user
 	repo = item['repo']['name']
-	print repo
+	#print repo
+	group = item['payload']['ref_type']
+	#print group
 	link = 'https://github.com/' + item['repo']['name']
-	print link
+	#print link
 	created_at = item['created_at']
-	print created_at
+	#print created_at
+
+	if group == "repository":
+		print '{} created {} {}'.format(user, group, repo)
+	else:
+		branch = item['payload']['ref']
+		print '{} created {} {} at {}'.format(user, group, branch, repo)
 
 # make public repo
 def publicEvent(item):
 	#event = item['type']
 	#print event
 	user = item['actor']['login']
-	print user
+	#print user
 	repo = item['repo']['name']
-	print repo
+	#print repo
 	link = 'https://github.com/' + item['repo']['name']
-	print link
+	#print link
 	created_at = item['created_at']
-	print created_at
+	#print created_at
 
 	print '{} made {} public'.format(user, repo)
 
@@ -205,20 +222,23 @@ def memberEvent(item):
 	#event = item['type']
 	#print event
 	user = item['actor']['login']
-	print user
+	#print user
 	repo = item['repo']['name']
-	print repo
+	#print repo
 	link = 'https://github.com/' + item['repo']['name']
-	print link
+	#print link
 	collab = item['payload']['member']['login']
-	print collab
+	#print collab
 	action = item['payload']['action']
-	print action
+	#print action
 	created_at = item['created_at']
-	print created_at
+	#print created_at
+
+	print '{} added {} as a collaborator to {}'.format(user, collab, repo)
 
 for item in reversed(response):
 	event = item['type']
+	#print event
 
 	if event == "PullRequestReviewCommentEvent": # review PR
 		PRReviewEvent(item)
