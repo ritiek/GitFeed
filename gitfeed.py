@@ -20,7 +20,19 @@ def getArgs(argv=None):
 	                    help='hide comment body in issues & PRs', action='store_true')
 	parser.add_argument('-nt', '--no-time-stamp', default=False,
 	                    help='hide time-stamp of events', action='store_true')
+	parser.add_argument('-ns', '--no-style', default=False,
+	                    help='show plain white text with no colors or style', action='store_true')
 	return parser.parse_args(argv)
+
+def removeColor():
+	Fore.GREEN = ''
+	Fore.CYAN = ''
+	Fore.RED = ''
+	Fore.YELLOW = ''
+	Fore.MAGENTA = ''
+	Fore.BLUE = ''
+	Style.BRIGHT = ''
+	return
 
 # review PR
 def PRReviewEvent(item, quiet):
@@ -192,6 +204,9 @@ def getPages(user, max_page, quiet):
 		getPage(user, page, quiet)
 
 args = getArgs()
+
+if args.no_style:
+	removeColor()
 
 user = args.user
 max_page = args.pages
