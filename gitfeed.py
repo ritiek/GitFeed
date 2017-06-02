@@ -13,11 +13,13 @@ def getArgs(argv=None):
 	parser = argparse.ArgumentParser(description='Check your GitHub Newsfeed via the command-line.',
 	                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 	parser.add_argument('-p', '--pages', default=1,
-	                    help='Number of newsfeed pages to fetch')
+	                    help='number of newsfeed pages to fetch')
 	parser.add_argument('-u', '--user', default='ritiek',
-	                    help='Number of newsfeed pages to fetch')
+	                    help='GitHub username for the user to fetch newsfeed for')
 	parser.add_argument('-q', '--quiet', default=False,
-	                    help='choose the song to download manually', action='store_true')
+	                    help='hide comment body in issues & PRs', action='store_true')
+	parser.add_argument('-nt', '--no-time-stamp', default=False,
+	                    help='hide time-stamp of events', action='store_true')
 	return parser.parse_args(argv)
 
 # review PR
@@ -176,6 +178,10 @@ def getPage(user, page, quiet):
 	url = 'https://api.github.com/users/' + user +'/received_events?page='
 	response = loads(requests.get(url + str(page)).text)
 	for item in reversed(response):
+		if not args.no_time_stamp:
+			created_at = item['created_at']
+			print(Fore.GREEN + Style.BRIGHT + created_at)
+
 		event = item['type']
 		if event == "PullRequestReviewCommentEvent": # review PR
 			PRReviewEvent(item, quiet)
@@ -211,4 +217,3 @@ user = args.user
 max_page = args.pages
 quiet = args.quiet
 getPages(user, max_page, quiet)
-
