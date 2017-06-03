@@ -50,7 +50,7 @@ def setConfigurationFiles():
 	file_path = os.path.join(home, folder_name, file_name)
 
 	if not os.path.isfile(file_path):
-		if sys_version > (3,0):
+		if version_info > (3,0):
 			user = input("What's your GitHub username? ")
 		else:
 			user = raw_input("What's your GitHub username? ")
