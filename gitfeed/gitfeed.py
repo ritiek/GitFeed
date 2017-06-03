@@ -4,11 +4,11 @@
 from colorama import Fore, Back, Style, init
 from json import loads
 from sys import argv, version_info
+from six.moves.configparser import SafeConfigParser
 import requests
 import argparse
 from datetime import datetime
 import time
-from ConfigParser import SafeConfigParser
 import os.path
 
 def getArgs(argv=None):
@@ -93,9 +93,9 @@ def PRReviewEvent(item, quiet):
 	number = item['payload']['pull_request']['number']
 	body = item['payload']['comment']['body']
 
-	print Fore.CYAN + Style.BRIGHT + '{} reviewed pull request {} on {}'.format(user, number, repo)
+	print(fixEncoding(Fore.CYAN + Style.BRIGHT + '{} reviewed pull request {} on {}'.format(user, number, repo)))
 	if not quiet:
-		print fixEncoding(body)
+		print(fixEncoding(body))
 
 # open PR, close PR
 def PREvent(item, quiet):
@@ -106,14 +106,14 @@ def PREvent(item, quiet):
 	number = item['payload']['pull_request']['number']
 	title = item['payload']['pull_request']['title']
 	if state == 'open':
-		print Fore.CYAN + '{} opened pull request {} on {}'.format(user, number, repo)
-		print Style.BRIGHT + fixEncoding(title)
+		print(fixEncoding(Fore.CYAN + '{} opened pull request {} on {}'.format(user, number, repo)))
+		print(fixEncoding(Style.BRIGHT + fixEncoding(title)))
 		body = item['payload']['pull_request']['body']
 		if not quiet:
-			print fixEncoding(body)
+			print(fixEncoding(body))
 	else:
-		print Fore.CYAN + '{} closed pull request {} on {}'.format(user, number, repo)
-		print Style.BRIGHT + title
+		print(fixEncoding(Fore.CYAN + '{} closed pull request {} on {}'.format(user, number, repo)))
+		print(fixEncoding(Style.BRIGHT + title))
 
 # comment on issue, PR
 def issueCommentEvent(item, quiet):
@@ -122,7 +122,7 @@ def issueCommentEvent(item, quiet):
 	#link = item['payload']['issue']['html_url']
 	#labels = item['payload']['issue']['labels'] # FIX_ME
 	#for x in labels:
-	#	print x['name']
+	#	print(x['name'])
 	#state = item['payload']['action']
 	number = item['payload']['issue']['number']
 	#title = item['payload']['issue']['title']
@@ -132,10 +132,10 @@ def issueCommentEvent(item, quiet):
 	except:
 		group = 'issue'
 
-	print Fore.CYAN + Style.BRIGHT + '{} commented on {} {} on {}'.format(user, group, number, repo)
+	print(fixEncoding(Fore.CYAN + Style.BRIGHT + '{} commented on {} {} on {}'.format(user, group, number, repo)))
 	if not quiet:
 		body = item['payload']['comment']['body']
-		print fixEncoding(body)
+		print(fixEncoding(body))
 
 # open issue, close issue
 def issuesEvent(item):
@@ -145,9 +145,9 @@ def issuesEvent(item):
 	state = item['payload']['action']
 	number = item['payload']['issue']['number']
 
-	print Fore.RED + Style.BRIGHT + '{} {} issue {} on {}'.format(user, state, number, repo)
+	print(fixEncoding(Fore.RED + Style.BRIGHT + '{} {} issue {} on {}'.format(user, state, number, repo)))
 	title = item['payload']['issue']['title']
-	print Style.BRIGHT + title
+	print(fixEncoding(Style.BRIGHT + title))
 
 # comment on a commit
 def commitCommentEvent(item, quiet):
@@ -156,23 +156,23 @@ def commitCommentEvent(item, quiet):
 	#link = item['payload']['issue']['html_url']
 	body = item['payload']['comment']['body']
 
-	print Fore.CYAN + Style.BRIGHT + '{} commented on {}'.format(user, repo)
+	print(fixEncoding(Fore.CYAN + Style.BRIGHT + '{} commented on {}'.format(user, repo)))
 	if not quiet:
-		print fixEncoding(body)
+		print(fixEncoding(body))
 
 # starred by following
 def watchEvent(item):
 	user = item['actor']['login']
 	repo = item['repo']['name']
 	#link = 'https://github.com/' + item['repo']['name']
-	print Fore.YELLOW + '{} starred {}'.format(user, repo)
+	print(fixEncoding(Fore.YELLOW + '{} starred {}'.format(user, repo)))
 
 # forked by following
 def forkEvent(item):
 	user = item['actor']['login']
 	repo = item['repo']['name']
 	#link = 'https://github.com/' + item['repo']['name']
-	print Fore.GREEN + '{} forked {}'.format(user, repo)
+	print(fixEncoding(Fore.GREEN + '{} forked {}'.format(user, repo)))
 
 # delete branch
 def deleteEvent(item):
@@ -181,7 +181,7 @@ def deleteEvent(item):
 	#link = 'https://github.com/' + item['repo']['name']
 	branch = item['payload']['ref']
 
-	print Fore.RED + '{} deleted branch {} at {}'.format(user, branch, repo)
+	print(fixEncoding(Fore.RED + '{} deleted branch {} at {}'.format(user, branch, repo)))
 
 # push commits
 def pushEvent(item):
@@ -191,7 +191,7 @@ def pushEvent(item):
 	branch = item['payload']['ref'].split('/')[-1]
 	#link = 'https://github.com/' + item['repo']['name']
 
-	print Fore.BLUE + '{} pushed {} new commit(s) to {} at {}'.format(user, size, branch, repo)
+	print(fixEncoding(Fore.BLUE + '{} pushed {} new commit(s) to {} at {}'.format(user, size, branch, repo)))
 
 # create repo, branch
 def createEvent(item):
@@ -201,10 +201,10 @@ def createEvent(item):
 	#link = 'https://github.com/' + item['repo']['name']
 
 	if group == "repository":
-		print Fore.MAGENTA + Style.BRIGHT + '{} created {} {}'.format(user, group, repo)
+		print(fixEncoding(Fore.MAGENTA + Style.BRIGHT + '{} created {} {}'.format(user, group, repo)))
 	else:
 		branch = item['payload']['ref']
-		print Fore.MAGENTA + Style.BRIGHT + '{} created {} {} at {}'.format(user, group, branch, repo)
+		print(fixEncoding(Fore.MAGENTA + Style.BRIGHT + '{} created {} {} at {}'.format(user, group, branch, repo)))
 
 # make public repo
 def publicEvent(item):
@@ -212,7 +212,7 @@ def publicEvent(item):
 	repo = item['repo']['name']
 	#link = 'https://github.com/' + item['repo']['name']
 
-	print Fore.MAGENTA + '{} made {} public'.format(user, repo)
+	print(fixEncoding(Fore.MAGENTA + '{} made {} public'.format(user, repo)))
 
 # add collab
 def memberEvent(item):
@@ -222,7 +222,7 @@ def memberEvent(item):
 	repo = item['repo']['name']
 	#link = 'https://github.com/' + item['repo']['name']
 
-	print Fore.MAGENTA + '{} {} {} as a collaborator to {}'.format(user, action, collab, repo)
+	print(fixEncoding(Fore.MAGENTA + '{} {} {} as a collaborator to {}'.format(user, action, collab, repo)))
 
 def getTimeDifference(created_at):
 	created_at = time.strptime(created_at, '%Y-%m-%dT%H:%M:%SZ')
@@ -235,10 +235,10 @@ def getTimeDifference(created_at):
 
 	difference = current_time - created_at
 
-	days = ('day', int(difference) / 86400)
-	hours = ('hour', int(difference) / 3600 % 24)
-	minutes = ('minute', int(difference) / 60 % 60)
-	seconds = ('second', int(difference) % 60)
+	days = ('day', int(int(difference) / 86400))
+	hours = ('hour', int(int(difference) / 3600 % 24))
+	minutes = ('minute', int(int(difference) / 60 % 60))
+	seconds = ('second', int(int(difference) % 60))
 
 	human_readable = (seconds, minutes, hours, days)
 	for item in human_readable:
