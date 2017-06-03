@@ -1,8 +1,10 @@
-# GitHub-Newsfeed
+# GitFeed
 
 Check your GitHub Newsfeed via the command-line
 
 ## Screenshots
+
+<img src="http://i.imgur.com/TPzBlVQ.png" width="600">
 
 ## Installation
 
