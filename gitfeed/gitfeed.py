@@ -50,7 +50,10 @@ def setConfigurationFiles():
 	file_path = os.path.join(home, folder_name, file_name)
 
 	if not os.path.isfile(file_path):
-		user = raw_input("What's your GitHub username? ")
+		if sys_version > (3,0):
+			user = input("What's your GitHub username? ")
+		else:
+			user = raw_input("What's your GitHub username? ")
 		print('Writing configuration to ' + file_path)
 		conf.add_section('GitHub Newsfeed')
 		conf.set('GitHub Newsfeed', 'user', user)
