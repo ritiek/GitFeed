@@ -20,8 +20,8 @@ setup(name='GitFeed',
       download_url='https://github.com/Ritiek/GitFeed/archive/v0.1.0.tar.gz',
       classifiers=[],
       install_requires=[
-            'requests',
-            'colorama',
+            'requests >= 2.17.3',
+            'colorama >= 0.3.7',
       ]
      )
 

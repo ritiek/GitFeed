@@ -1,0 +1,11 @@
+README.rst
+setup.cfg
+setup.py
+GitFeed.egg-info/PKG-INFO
+GitFeed.egg-info/SOURCES.txt
+GitFeed.egg-info/dependency_links.txt
+GitFeed.egg-info/entry_points.txt
+GitFeed.egg-info/requires.txt
+GitFeed.egg-info/top_level.txt
+gitfeed/__init__.py
+gitfeed/gitfeed.py
