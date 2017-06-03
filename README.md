@@ -1,6 +1,8 @@
 # GitFeed
 
-Check your GitHub Newsfeed via the command-line
+- Check your GitHub Newsfeed via the command-line.
+
+- Newsfeed includes all the news from people you are following on GitHub, repositories you are watching, etc. All news you would find on your GitHub dashboard.
 
 ## Screenshots
 
