@@ -1,3 +1,0 @@
-[console_scripts]
-gitfeed = gitfeed.gitfeed:cli
-
