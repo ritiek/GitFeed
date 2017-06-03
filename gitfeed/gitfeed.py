@@ -62,7 +62,7 @@ def setConfigurationFiles():
 		conf.set('GitHub Newsfeed', 'no_time_stamp', 'False')
 		conf.set('GitHub Newsfeed', 'no_style', 'False')
 
-		with open(file_path, 'wb') as configfile:
+		with open(file_path, 'w') as configfile:
 			conf.write(configfile)
 		print('')
 
