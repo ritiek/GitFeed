@@ -4,12 +4,16 @@
 from colorama import Fore, Back, Style, init
 from json import loads
 from sys import argv, version_info
-from six.moves.configparser import SafeConfigParser
+from datetime import datetime
 import requests
 import argparse
-from datetime import datetime
 import time
 import os.path
+
+try:
+    import configparser
+except:
+    from six.moves import configparser
 
 def getArgs(argv=None):
 	file_path = setConfigurationFiles()
