@@ -17,7 +17,7 @@ except:
 
 def getArgs(argv=None):
 	file_path = setConfigurationFiles()
-	conf = SafeConfigParser()
+	conf = configparser.SafeConfigParser()
 
 	conf.read(file_path)
 	user = conf.get('GitHub Newsfeed', 'user')
@@ -41,7 +41,7 @@ def getArgs(argv=None):
 	return parser.parse_args(argv)
 
 def setConfigurationFiles():
-	conf = SafeConfigParser()
+	conf = configparser.SafeConfigParser()
 
 	home = os.path.expanduser('~')
 	folder_name = '.gitfeed'
