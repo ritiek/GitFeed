@@ -3,19 +3,31 @@
 # Background color for labels
 from colorama import Fore, Back, Style, init
 from json import loads
-from sys import argv
+from sys import argv, version_info
 import requests
 import argparse
 from datetime import datetime
 import time
+from ConfigParser import SafeConfigParser
+import os.path
 
 def getArgs(argv=None):
+	file_path = setConfigurationFiles()
+	conf = SafeConfigParser()
+
+	conf.read(file_path)
+	user = conf.get('GitHub Newsfeed', 'user')
+	max_page = conf.get('GitHub Newsfeed', 'max_page')
+	quiet = conf.get('GitHub Newsfeed', 'quiet')
+	no_time_stamp = conf.get('GitHub Newsfeed', 'no_time_stamp')
+	no_style = conf.get('GitHub Newsfeed', 'no_style')
+
 	parser = argparse.ArgumentParser(description='Check your GitHub Newsfeed via the command-line.',
 	                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-	parser.add_argument('-p', '--pages', default=1,
-	                    help='number of newsfeed pages to fetch')
-	parser.add_argument('-u', '--user', default='ritiek',
+	parser.add_argument('-u', '--user', default=user,
 	                    help='GitHub username for the user to fetch newsfeed for')
+	parser.add_argument('-p', '--pages', default=max_page,
+	                    help='number of newsfeed pages to fetch')
 	parser.add_argument('-q', '--quiet', default=False,
 	                    help='hide comment body in issues & PRs', action='store_true')
 	parser.add_argument('-nt', '--no-time-stamp', default=False,
@@ -24,6 +36,35 @@ def getArgs(argv=None):
 	                    help='show plain white text with no colors or style', action='store_true')
 	return parser.parse_args(argv)
 
+def setConfigurationFiles():
+	conf = SafeConfigParser()
+
+	home = os.path.expanduser('~')
+	folder_name = '.gitfeed'
+	folder_path = os.path.join(home, folder_name)
+
+	if not os.path.exists(folder_path):
+		os.makedirs(folder_path)
+
+	file_name = 'gitfeed.ini'
+	file_path = os.path.join(home, folder_name, file_name)
+
+	if not os.path.isfile(file_path):
+		user = raw_input("What's your GitHub username? ")
+		print('Writing configuration to ' + file_path)
+		conf.add_section('GitHub Newsfeed')
+		conf.set('GitHub Newsfeed', 'user', user)
+		conf.set('GitHub Newsfeed', 'max_page', '1')
+		conf.set('GitHub Newsfeed', 'quiet', 'False')
+		conf.set('GitHub Newsfeed', 'no_time_stamp', 'False')
+		conf.set('GitHub Newsfeed', 'no_style', 'False')
+
+		with open(file_path, 'wb') as configfile:
+			conf.write(configfile)
+		print('')
+
+	return file_path
+
 def removeColor():
 	Fore.GREEN = ''
 	Fore.CYAN = ''
@@ -31,8 +72,16 @@ def removeColor():
 	Fore.YELLOW = ''
 	Fore.MAGENTA = ''
 	Fore.BLUE = ''
+	Fore.WHITE = ''
 	Style.BRIGHT = ''
+	Back.BLUE = ''
 	return
+
+def fixEncoding(query):
+	if version_info > (3, 0):
+		return query
+	else:
+		return query.encode('utf-8')
 
 # review PR
 def PRReviewEvent(item, quiet):
@@ -46,7 +95,7 @@ def PRReviewEvent(item, quiet):
 
 	print Fore.CYAN + Style.BRIGHT + '{} reviewed pull request {} on {}'.format(user, number, repo)
 	if not quiet:
-		print body
+		print fixEncoding(body)
 
 # open PR, close PR
 def PREvent(item, quiet):
@@ -58,10 +107,10 @@ def PREvent(item, quiet):
 	title = item['payload']['pull_request']['title']
 	if state == 'open':
 		print Fore.CYAN + '{} opened pull request {} on {}'.format(user, number, repo)
-		print Style.BRIGHT + title
+		print Style.BRIGHT + fixEncoding(title)
 		body = item['payload']['pull_request']['body']
 		if not quiet:
-			print body
+			print fixEncoding(body)
 	else:
 		print Fore.CYAN + '{} closed pull request {} on {}'.format(user, number, repo)
 		print Style.BRIGHT + title
@@ -86,7 +135,7 @@ def issueCommentEvent(item, quiet):
 	print Fore.CYAN + Style.BRIGHT + '{} commented on {} {} on {}'.format(user, group, number, repo)
 	if not quiet:
 		body = item['payload']['comment']['body']
-		print body
+		print fixEncoding(body)
 
 # open issue, close issue
 def issuesEvent(item):
@@ -109,7 +158,7 @@ def commitCommentEvent(item, quiet):
 
 	print Fore.CYAN + Style.BRIGHT + '{} commented on {}'.format(user, repo)
 	if not quiet:
-		print body
+		print fixEncoding(body)
 
 # starred by following
 def watchEvent(item):
@@ -250,7 +299,7 @@ def cli():
 
 	args = getArgs()
 	user = args.user
-	max_page = args.pages
+	max_page = int(args.pages)
 	quiet = args.quiet
 	nt = args.no_time_stamp
 
