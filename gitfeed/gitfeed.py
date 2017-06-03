@@ -44,7 +44,7 @@ def PRReviewEvent(item, quiet):
 	number = item['payload']['pull_request']['number']
 	body = item['payload']['comment']['body']
 
-	print Fore.GREEN + Style.BRIGHT + '{} reviewed pull request {} on {}'.format(user, number, repo)
+	print Fore.CYAN + Style.BRIGHT + '{} reviewed pull request {} on {}'.format(user, number, repo)
 	if not quiet:
 		print body
 
@@ -209,7 +209,8 @@ def getPage(user, page, quiet, nt):
 			created_at = item['created_at']
 			difference = getTimeDifference(created_at)
 
-			print(Fore.GREEN + difference)
+			#print(Fore.WHITE + Style.NORMAL + Back.BLUE + difference)
+			print(Fore.WHITE + Back.BLUE + difference)
 
 		event = item['type']
 
@@ -242,7 +243,7 @@ def getPage(user, page, quiet, nt):
 
 def getPages(user, max_page, quiet, nt):
 	for page in range(max_page, 0, -1):
-		getPage(user, 3, quiet, nt)
+		getPage(user, page, quiet, nt)
 
 def cli():
 	init(autoreset=True)
