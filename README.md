@@ -12,6 +12,8 @@
 
 GitFeed can be installed from pypi.
 
+For best results (compatibility with Pager), use Python3
+
 ```
 pip install gitfeed
 ```
