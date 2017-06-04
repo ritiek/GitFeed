@@ -121,7 +121,7 @@ def PREvent(item, quiet):
 		event_output.append(fixEncoding(Fore.CYAN + '{} opened pull request {} on {}'.format(user, number, repo)))
 		event_output.append(fixEncoding(Style.BRIGHT + fixEncoding(title)))
 		body = item['payload']['pull_request']['body']
-		if not quiet:
+		if not quiet and not body is None:
 			event_output.append(fixEncoding(body))
 	else:
 		event_output.append(fixEncoding(Fore.CYAN + '{} closed pull request {} on {}'.format(user, number, repo)))
