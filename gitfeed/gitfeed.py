@@ -289,7 +289,7 @@ def getPage(user, page, quiet, nt):
 			difference = getTimeDifference(created_at)
 
 			#print(Fore.WHITE + Style.NORMAL + Back.BLUE + difference)
-			output.append(Fore.WHITE + Back.BLUE + difference)
+			output.append(Fore.WHITE + Back.BLUE + difference + Back.RESET)
 
 		event = item['type']
 
@@ -323,7 +323,7 @@ def getPage(user, page, quiet, nt):
 
 def getPages(user, max_page, quiet, nt):
 	output = []
-	for page in range(0, max_page):
+	for page in range(1, max_page+1):
 		output.append(getPage(user, page, quiet, nt))
 
 	pager("\n".join(output))
