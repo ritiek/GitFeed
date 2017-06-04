@@ -5,6 +5,7 @@ from colorama import Fore, Back, Style, init
 from json import loads
 from sys import argv, version_info
 from datetime import datetime
+from pydoc import pager
 import requests
 import argparse
 import time
@@ -100,9 +101,11 @@ def PRReviewEvent(item, quiet):
 	number = item['payload']['pull_request']['number']
 	body = item['payload']['comment']['body']
 
-	print(fixEncoding(Fore.CYAN + Style.BRIGHT + '{} reviewed pull request {} on {}'.format(user, number, repo)))
+	event_output = [fixEncoding(Fore.CYAN + Style.BRIGHT + '{} reviewed pull request {} on {}'.format(user, number, repo))]
 	if not quiet:
-		print(fixEncoding(body))
+		event_output.append(fixEncoding(body))
+
+	return "\n".join(event_output)
 
 # open PR, close PR
 def PREvent(item, quiet):
@@ -112,15 +115,19 @@ def PREvent(item, quiet):
 	state = item['payload']['pull_request']['state']
 	number = item['payload']['pull_request']['number']
 	title = item['payload']['pull_request']['title']
+
+	event_output = []
 	if state == 'open':
-		print(fixEncoding(Fore.CYAN + '{} opened pull request {} on {}'.format(user, number, repo)))
-		print(fixEncoding(Style.BRIGHT + fixEncoding(title)))
+		event_output.append(fixEncoding(Fore.CYAN + '{} opened pull request {} on {}'.format(user, number, repo)))
+		event_output.append(fixEncoding(Style.BRIGHT + fixEncoding(title)))
 		body = item['payload']['pull_request']['body']
 		if not quiet:
-			print(fixEncoding(body))
+			event_output.append(fixEncoding(body))
 	else:
-		print(fixEncoding(Fore.CYAN + '{} closed pull request {} on {}'.format(user, number, repo)))
-		print(fixEncoding(Style.BRIGHT + title))
+		event_output.append(fixEncoding(Fore.CYAN + '{} closed pull request {} on {}'.format(user, number, repo)))
+		event_output.append(fixEncoding(Style.BRIGHT + title))
+
+	return "\n".join(event_output)
 
 # comment on issue, PR
 def issueCommentEvent(item, quiet):
@@ -139,10 +146,12 @@ def issueCommentEvent(item, quiet):
 	except:
 		group = 'issue'
 
-	print(fixEncoding(Fore.CYAN + Style.BRIGHT + '{} commented on {} {} on {}'.format(user, group, number, repo)))
+	event_output = [fixEncoding(Fore.CYAN + Style.BRIGHT + '{} commented on {} {} on {}'.format(user, group, number, repo))]
 	if not quiet:
 		body = item['payload']['comment']['body']
-		print(fixEncoding(body))
+		event_output.append(fixEncoding(body))
+
+	return "\n".join(event_output)
 
 # open issue, close issue
 def issuesEvent(item):
@@ -152,9 +161,11 @@ def issuesEvent(item):
 	state = item['payload']['action']
 	number = item['payload']['issue']['number']
 
-	print(fixEncoding(Fore.RED + Style.BRIGHT + '{} {} issue {} on {}'.format(user, state, number, repo)))
+	event_output = [fixEncoding(Fore.RED + Style.BRIGHT + '{} {} issue {} on {}'.format(user, state, number, repo))]
 	title = item['payload']['issue']['title']
-	print(fixEncoding(Style.BRIGHT + title))
+	event_output.append(fixEncoding(Style.BRIGHT + title))
+
+	return "\n".join(event_output)
 
 # comment on a commit
 def commitCommentEvent(item, quiet):
@@ -163,23 +174,27 @@ def commitCommentEvent(item, quiet):
 	#link = item['payload']['issue']['html_url']
 	body = item['payload']['comment']['body']
 
-	print(fixEncoding(Fore.CYAN + Style.BRIGHT + '{} commented on {}'.format(user, repo)))
+	event_output = [fixEncoding(Fore.CYAN + Style.BRIGHT + '{} commented on {}'.format(user, repo))]
 	if not quiet:
-		print(fixEncoding(body))
+		event_output.append(fixEncoding(body))
+
+	return "\n".join(event_output)
 
 # starred by following
 def watchEvent(item):
 	user = item['actor']['login']
 	repo = item['repo']['name']
 	#link = 'https://github.com/' + item['repo']['name']
-	print(fixEncoding(Fore.YELLOW + '{} starred {}'.format(user, repo)))
+	event_output = fixEncoding(Fore.YELLOW + '{} starred {}'.format(user, repo))
+	return event_output
 
 # forked by following
 def forkEvent(item):
 	user = item['actor']['login']
 	repo = item['repo']['name']
 	#link = 'https://github.com/' + item['repo']['name']
-	print(fixEncoding(Fore.GREEN + '{} forked {}'.format(user, repo)))
+	event_output = fixEncoding(Fore.GREEN + '{} forked {}'.format(user, repo))
+	return event_output
 
 # delete branch
 def deleteEvent(item):
@@ -188,7 +203,8 @@ def deleteEvent(item):
 	#link = 'https://github.com/' + item['repo']['name']
 	branch = item['payload']['ref']
 
-	print(fixEncoding(Fore.RED + '{} deleted branch {} at {}'.format(user, branch, repo)))
+	event_output = fixEncoding(Fore.RED + '{} deleted branch {} at {}'.format(user, branch, repo))
+	return event_output
 
 # push commits
 def pushEvent(item):
@@ -198,7 +214,8 @@ def pushEvent(item):
 	branch = item['payload']['ref'].split('/')[-1]
 	#link = 'https://github.com/' + item['repo']['name']
 
-	print(fixEncoding(Fore.BLUE + '{} pushed {} new commit(s) to {} at {}'.format(user, size, branch, repo)))
+	event_output = fixEncoding(Fore.BLUE + '{} pushed {} new commit(s) to {} at {}'.format(user, size, branch, repo))
+	return event_output
 
 # create repo, branch
 def createEvent(item):
@@ -207,11 +224,14 @@ def createEvent(item):
 	group = item['payload']['ref_type']
 	#link = 'https://github.com/' + item['repo']['name']
 
+	event_output = ""
 	if group == "repository":
-		print(fixEncoding(Fore.MAGENTA + Style.BRIGHT + '{} created {} {}'.format(user, group, repo)))
+		event_output = fixEncoding(Fore.MAGENTA + Style.BRIGHT + '{} created {} {}'.format(user, group, repo))
 	else:
 		branch = item['payload']['ref']
-		print(fixEncoding(Fore.MAGENTA + Style.BRIGHT + '{} created {} {} at {}'.format(user, group, branch, repo)))
+		event_output = fixEncoding(Fore.MAGENTA + Style.BRIGHT + '{} created {} {} at {}'.format(user, group, branch, repo))
+
+	return event_output
 
 # make public repo
 def publicEvent(item):
@@ -219,7 +239,8 @@ def publicEvent(item):
 	repo = item['repo']['name']
 	#link = 'https://github.com/' + item['repo']['name']
 
-	print(fixEncoding(Fore.MAGENTA + '{} made {} public'.format(user, repo)))
+	event_output = fixEncoding(Fore.MAGENTA + '{} made {} public'.format(user, repo))
+	return event_output
 
 # add collab
 def memberEvent(item):
@@ -229,7 +250,8 @@ def memberEvent(item):
 	repo = item['repo']['name']
 	#link = 'https://github.com/' + item['repo']['name']
 
-	print(fixEncoding(Fore.MAGENTA + '{} {} {} as a collaborator to {}'.format(user, action, collab, repo)))
+	event_output = fixEncoding(Fore.MAGENTA + '{} {} {} as a collaborator to {}'.format(user, action, collab, repo))
+	return event_output
 
 def getTimeDifference(created_at):
 	created_at = time.strptime(created_at, '%Y-%m-%dT%H:%M:%SZ')
@@ -260,46 +282,51 @@ def getTimeDifference(created_at):
 def getPage(user, page, quiet, nt):
 	url = 'https://api.github.com/users/' + user +'/received_events?page='
 	response = loads(requests.get(url + str(page)).text)
-	for item in reversed(response):
+	output = []
+	for item in response:
 		if not nt:
 			created_at = item['created_at']
 			difference = getTimeDifference(created_at)
 
 			#print(Fore.WHITE + Style.NORMAL + Back.BLUE + difference)
-			print(Fore.WHITE + Back.BLUE + difference)
+			output.append(Fore.WHITE + Back.BLUE + difference)
 
 		event = item['type']
 
 		if event == "PullRequestReviewCommentEvent": # review PR
-			PRReviewEvent(item, quiet)
+			output.append(PRReviewEvent(item, quiet))
 		elif event == "PullRequestEvent": # open PR, close PR
-			PREvent(item, quiet)
+			output.append(PREvent(item, quiet))
 		elif event == "IssueCommentEvent": # comment on issue/PR
-			issueCommentEvent(item, quiet)
+			output.append(issueCommentEvent(item, quiet))
 		elif event == "IssuesEvent": # open issue, close issue
-			issuesEvent(item)
+			output.append(issuesEvent(item))
 		elif event == "CommitCommentEvent":
-			commitCommentEvent(item, quiet)
+			output.append(commitCommentEvent(item, quiet))
 		elif event == "WatchEvent": # starred
-			watchEvent(item)
+			output.append(watchEvent(item))
 		elif event == "ForkEvent": # fork
-			forkEvent(item)
+			output.append(forkEvent(item))
 		elif event == "DeleteEvent": # delete branch
-			deleteEvent(item)
+			output.append(deleteEvent(item))
 		elif event == "PushEvent": # push commits
-			pushEvent(item)
+			output.append(pushEvent(item))
 		elif event == "CreateEvent": # make new repo, branch
-			createEvent(item)
+			output.append(createEvent(item))
 		elif event == "PublicEvent": # make repo public
-			publicEvent(item)
+			output.append(publicEvent(item))
 		elif event == "MemberEvent": # add collab
-			memberEvent(item)
+			output.append(memberEvent(item))
 
-		print('')
+		output.append("")
+	return "\n".join(output)
 
 def getPages(user, max_page, quiet, nt):
-	for page in range(max_page, 0, -1):
-		getPage(user, page, quiet, nt)
+	output = []
+	for page in range(0, max_page):
+		output.append(getPage(user, page, quiet, nt))
+
+	pager("\n".join(output))
 
 def cli():
 	init(autoreset=True)
