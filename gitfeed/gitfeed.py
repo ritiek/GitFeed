@@ -2,12 +2,12 @@
 
 # Background color for labels
 from colorama import Fore, Back, Style, init
-from json import loads
-from sys import argv, version_info
+import json
 from datetime import datetime
-from pydoc import pager
+import pydoc
 import requests
 import argparse
+import sys
 import time
 import os.path
 
@@ -16,8 +16,8 @@ try:
 except:
     from six.moves import configparser
 
-def getArgs(argv=None):
-	file_path = setConfigurationFiles()
+def get_args(argv=None):
+	file_path = set_configuration()
 	conf = configparser.SafeConfigParser()
 
 	conf.read(file_path)
@@ -39,9 +39,9 @@ def getArgs(argv=None):
 	                    help='hide time-stamp of events', action='store_true')
 	parser.add_argument('-ns', '--no-style', default=False,
 	                    help='show plain white text with no colors or style', action='store_true')
-	return parser.parse_args(argv)
+	return parser.parse_args(sys.argv[1:])
 
-def setConfigurationFiles():
+def set_configuration():
 	conf = configparser.SafeConfigParser()
 
 	home = os.path.expanduser('~')
@@ -55,7 +55,7 @@ def setConfigurationFiles():
 	file_path = os.path.join(home, folder_name, file_name)
 
 	if not os.path.isfile(file_path):
-		if version_info > (3,0):
+		if sys.version_info > (3,0):
 			user = input("What's your GitHub username? ")
 		else:
 			user = raw_input("What's your GitHub username? ")
@@ -73,7 +73,7 @@ def setConfigurationFiles():
 
 	return file_path
 
-def removeColor():
+def remove_color():
 	Fore.GREEN = ''
 	Fore.CYAN = ''
 	Fore.RED = ''
@@ -85,8 +85,8 @@ def removeColor():
 	Back.BLUE = ''
 	return
 
-def fixEncoding(query):
-	if version_info > (3, 0):
+def fix_encoding(query):
+	if sys.version_info > (3, 0):
 		return query
 	else:
 		return query.encode('utf-8')
@@ -101,9 +101,9 @@ def PRReviewEvent(item, quiet):
 	number = item['payload']['pull_request']['number']
 	body = item['payload']['comment']['body']
 
-	event_output = [fixEncoding(Fore.CYAN + Style.BRIGHT + '{} reviewed pull request {} on {}'.format(user, number, repo))]
+	event_output = [fix_encoding(Fore.CYAN + Style.BRIGHT + '{} reviewed pull request {} on {}'.format(user, number, repo))]
 	if not quiet:
-		event_output.append(fixEncoding(body))
+		event_output.append(fix_encoding(body))
 
 	return "\n".join(event_output)
 
@@ -118,14 +118,14 @@ def PREvent(item, quiet):
 
 	event_output = []
 	if state == 'open':
-		event_output.append(fixEncoding(Fore.CYAN + '{} opened pull request {} on {}'.format(user, number, repo)))
-		event_output.append(fixEncoding(Style.BRIGHT + fixEncoding(title)))
+		event_output.append(fix_encoding(Fore.CYAN + '{} opened pull request {} on {}'.format(user, number, repo)))
+		event_output.append(fix_encoding(Style.BRIGHT + fix_encoding(title)))
 		body = item['payload']['pull_request']['body']
 		if not quiet and not body is None:
-			event_output.append(fixEncoding(body))
+			event_output.append(fix_encoding(body))
 	else:
-		event_output.append(fixEncoding(Fore.CYAN + '{} closed pull request {} on {}'.format(user, number, repo)))
-		event_output.append(fixEncoding(Style.BRIGHT + title))
+		event_output.append(fix_encoding(Fore.CYAN + '{} closed pull request {} on {}'.format(user, number, repo)))
+		event_output.append(fix_encoding(Style.BRIGHT + title))
 
 	return "\n".join(event_output)
 
@@ -146,10 +146,10 @@ def issueCommentEvent(item, quiet):
 	except:
 		group = 'issue'
 
-	event_output = [fixEncoding(Fore.CYAN + Style.BRIGHT + '{} commented on {} {} on {}'.format(user, group, number, repo))]
+	event_output = [fix_encoding(Fore.CYAN + Style.BRIGHT + '{} commented on {} {} on {}'.format(user, group, number, repo))]
 	if not quiet:
 		body = item['payload']['comment']['body']
-		event_output.append(fixEncoding(body))
+		event_output.append(fix_encoding(body))
 
 	return "\n".join(event_output)
 
@@ -161,9 +161,9 @@ def issuesEvent(item):
 	state = item['payload']['action']
 	number = item['payload']['issue']['number']
 
-	event_output = [fixEncoding(Fore.RED + Style.BRIGHT + '{} {} issue {} on {}'.format(user, state, number, repo))]
+	event_output = [fix_encoding(Fore.RED + Style.BRIGHT + '{} {} issue {} on {}'.format(user, state, number, repo))]
 	title = item['payload']['issue']['title']
-	event_output.append(fixEncoding(Style.BRIGHT + title))
+	event_output.append(fix_encoding(Style.BRIGHT + title))
 
 	return "\n".join(event_output)
 
@@ -174,9 +174,9 @@ def commitCommentEvent(item, quiet):
 	#link = item['payload']['issue']['html_url']
 	body = item['payload']['comment']['body']
 
-	event_output = [fixEncoding(Fore.CYAN + Style.BRIGHT + '{} commented on {}'.format(user, repo))]
+	event_output = [fix_encoding(Fore.CYAN + Style.BRIGHT + '{} commented on {}'.format(user, repo))]
 	if not quiet:
-		event_output.append(fixEncoding(body))
+		event_output.append(fix_encoding(body))
 
 	return "\n".join(event_output)
 
@@ -185,7 +185,7 @@ def watchEvent(item):
 	user = item['actor']['login']
 	repo = item['repo']['name']
 	#link = 'https://github.com/' + item['repo']['name']
-	event_output = fixEncoding(Fore.YELLOW + '{} starred {}'.format(user, repo))
+	event_output = fix_encoding(Fore.YELLOW + '{} starred {}'.format(user, repo))
 	return event_output
 
 # forked by following
@@ -193,7 +193,7 @@ def forkEvent(item):
 	user = item['actor']['login']
 	repo = item['repo']['name']
 	#link = 'https://github.com/' + item['repo']['name']
-	event_output = fixEncoding(Fore.GREEN + '{} forked {}'.format(user, repo))
+	event_output = fix_encoding(Fore.GREEN + '{} forked {}'.format(user, repo))
 	return event_output
 
 # delete branch
@@ -203,7 +203,7 @@ def deleteEvent(item):
 	#link = 'https://github.com/' + item['repo']['name']
 	branch = item['payload']['ref']
 
-	event_output = fixEncoding(Fore.RED + '{} deleted branch {} at {}'.format(user, branch, repo))
+	event_output = fix_encoding(Fore.RED + '{} deleted branch {} at {}'.format(user, branch, repo))
 	return event_output
 
 # push commits
@@ -214,7 +214,7 @@ def pushEvent(item):
 	branch = item['payload']['ref'].split('/')[-1]
 	#link = 'https://github.com/' + item['repo']['name']
 
-	event_output = fixEncoding(Fore.BLUE + '{} pushed {} new commit(s) to {} at {}'.format(user, size, branch, repo))
+	event_output = fix_encoding(Fore.BLUE + '{} pushed {} new commit(s) to {} at {}'.format(user, size, branch, repo))
 	return event_output
 
 # create repo, branch
@@ -226,10 +226,10 @@ def createEvent(item):
 
 	event_output = ""
 	if group == "repository":
-		event_output = fixEncoding(Fore.MAGENTA + Style.BRIGHT + '{} created {} {}'.format(user, group, repo))
+		event_output = fix_encoding(Fore.MAGENTA + Style.BRIGHT + '{} created {} {}'.format(user, group, repo))
 	else:
 		branch = item['payload']['ref']
-		event_output = fixEncoding(Fore.MAGENTA + Style.BRIGHT + '{} created {} {} at {}'.format(user, group, branch, repo))
+		event_output = fix_encoding(Fore.MAGENTA + Style.BRIGHT + '{} created {} {} at {}'.format(user, group, branch, repo))
 
 	return event_output
 
@@ -239,7 +239,7 @@ def publicEvent(item):
 	repo = item['repo']['name']
 	#link = 'https://github.com/' + item['repo']['name']
 
-	event_output = fixEncoding(Fore.MAGENTA + '{} made {} public'.format(user, repo))
+	event_output = fix_encoding(Fore.MAGENTA + '{} made {} public'.format(user, repo))
 	return event_output
 
 # add collab
@@ -250,10 +250,10 @@ def memberEvent(item):
 	repo = item['repo']['name']
 	#link = 'https://github.com/' + item['repo']['name']
 
-	event_output = fixEncoding(Fore.MAGENTA + '{} {} {} as a collaborator to {}'.format(user, action, collab, repo))
+	event_output = fix_encoding(Fore.MAGENTA + '{} {} {} as a collaborator to {}'.format(user, action, collab, repo))
 	return event_output
 
-def getTimeDifference(created_at):
+def get_time_difference(created_at):
 	created_at = time.strptime(created_at, '%Y-%m-%dT%H:%M:%SZ')
 	created_at = time.mktime(created_at)
 
@@ -279,14 +279,14 @@ def getTimeDifference(created_at):
 
 	return statement
 
-def getPage(user, page, quiet, nt):
+def get_page(user, page, quiet, nt):
 	url = 'https://api.github.com/users/' + user +'/received_events?page='
-	response = loads(requests.get(url + str(page)).text)
+	response = json.loads(requests.get(url + str(page)).text)
 	output = []
 	for item in response:
 		if not nt:
 			created_at = item['created_at']
-			difference = getTimeDifference(created_at)
+			difference = get_time_difference(created_at)
 
 			#print(Fore.WHITE + Style.NORMAL + Back.BLUE + difference)
 			output.append(Fore.WHITE + Back.BLUE + difference + Back.RESET)
@@ -321,26 +321,26 @@ def getPage(user, page, quiet, nt):
 		output.append("")
 	return "\n".join(output)
 
-def getPages(user, max_page, quiet, nt):
+def get_pages(user, max_page, quiet, nt):
 	output = []
 	for page in range(1, max_page+1):
-		output.append(getPage(user, page, quiet, nt))
+		output.append(get_page(user, page, quiet, nt))
 
-	pager("\n".join(output))
+	pydoc.pager("\n".join(output))
 
 def cli():
 	init(autoreset=True)
 
-	args = getArgs()
+	args = get_args()
 	user = args.user
 	max_page = int(args.pages)
 	quiet = args.quiet
 	nt = args.no_time_stamp
 
 	if args.no_style:
-		removeColor()
+		remove_color()
 
-	getPages(user, max_page, quiet, nt)
+	get_pages(user, max_page, quiet, nt)
 
 if __name__ == '__main__':
 	cli()
