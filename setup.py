@@ -3,9 +3,13 @@
 from setuptools import setup, find_packages
 import gitfeed
 
+with open("README.rst", "r") as f:
+    long_description = f.read()
+
 setup(name='GitFeed',
-      version='0.1.8',
+      version=gitfeed.__version__,
       description='Check your GitHub Newsfeed via the command-line.',
+      long_description=long_description,
       author='Ritiek Malhotra',
       author_email='ritiekmalhotra123@gmail.com',
       packages = find_packages(),
@@ -14,10 +18,10 @@ setup(name='GitFeed',
                   'gitfeed = gitfeed.gitfeed:cli',
             ]
       },
-      url='https://www.github.com/Ritiek/GitFeed',
+      url='https://www.github.com/ritiek/GitFeed',
       keywords=['GitHub', 'news', 'feed', 'command-line', 'python'],
       license='MIT',
-      download_url='https://github.com/Ritiek/GitFeed/archive/v0.1.8.tar.gz',
+      download_url='https://github.com/Ritiek/GitFeed/archive/v' + gitfeed.__version__ + '.tar.gz',
       classifiers=[],
       install_requires=[
             'requests >= 2.17.3',

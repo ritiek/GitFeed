@@ -1,5 +1,7 @@
 # GitFeed
 
+[![pypi.python.org](https://img.shields.io/pypi/v/GitFeed.svg)](https://pypi.org/project/GitFeed/) [![build Status](https://travis-ci.org/ritiek/GitFeed.svg?branch=master)](https://travis-ci.org/ritiek/GitFeed/)
+
 - Check your GitHub Newsfeed via the command-line.
 
 - Newsfeed includes all the news from people you are following on GitHub, repositories you are watching, etc. All news you would find on your GitHub dashboard.
